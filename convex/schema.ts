@@ -5,7 +5,7 @@ export default defineSchema({
     chats: defineTable({
         lastMessageId: v.union(v.id('messages'), v.null()),
         content: v.union(v.string(), v.null()),
-        sender: v.id('users'),
+        sender: v.union(v.id('users'), v.null()),
     }),
 
     users: defineTable({
