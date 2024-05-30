@@ -1,3 +1,4 @@
+import { PaginationOptions } from 'convex/server';
 import { Id } from './_generated/dataModel';
 import { DatabaseReader, DatabaseWriter } from './_generated/server';
 import { findDuplicateChatId } from './helpers';
@@ -111,4 +112,16 @@ export const getChats = async (
         params.page * params.perPage
     );
     return paginated;
+};
+
+export const getMessages = async (
+    db: DatabaseReader,
+    params: { chatId: Id<'chats'>; paginationOpts: PaginationOptions }
+) => {
+    const messages = await db
+        .query('messages')
+        .filter((q) => q.eq(q.field('chatId'), params.chatId))
+        .order('desc')
+        .paginate(params.paginationOpts);
+    return messages;
 };

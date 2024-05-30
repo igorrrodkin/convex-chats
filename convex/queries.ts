@@ -4,9 +4,11 @@ import {
     createChat,
     getChats,
     getExistingChat,
+    getMessages,
     getUserById,
     insertMessage,
 } from './repo';
+import { paginationOptsValidator } from 'convex/server';
 
 export const createUser = mutation({
     args: { name: v.string() },
@@ -60,6 +62,17 @@ export const listChats = query({
     },
     handler: async (ctx, args) => {
         const chats = await getChats(ctx.db, args);
+        return { items: chats };
+    },
+});
+
+export const listMessages = query({
+    args: {
+        chatId: v.id('chats'),
+        paginationOpts: paginationOptsValidator,
+    },
+    handler: async (ctx, args) => {
+        const chats = await getMessages(ctx.db, args);
         return { items: chats };
     },
 });
