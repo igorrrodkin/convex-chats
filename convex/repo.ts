@@ -101,7 +101,7 @@ export const getChats = async (
                 .query('chats')
                 .filter((q) => q.eq(q.field('_id'), ids.chatId))
                 .first();
-            return chat!;
+            return { ...chat!, name: ids.chatName }!;
         })
     );
     const sorted = chats.sort(
