@@ -77,7 +77,7 @@ export const listMessages = query({
     },
 });
 
-export const checkChatExistence = query({
+export const checkChatExistence = mutation({
     args: {
         requestUserId: v.id('users'),
         userId: v.id('users'),
