@@ -1,8 +1,12 @@
-import { DatabaseReader, DatabaseWriter, mutation } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { findDuplicateChatId } from './helpers';
-import { Id } from './_generated/dataModel';
-import { createChat, insertMessage } from './repo';
+import {
+    createChat,
+    getChats,
+    getExistingChat,
+    getUserById,
+    insertMessage,
+} from './repo';
 
 export const createUser = mutation({
     args: { name: v.string() },
@@ -20,45 +24,42 @@ export const createUser = mutation({
 });
 
 export const sendMessage = mutation({
-    args: { userId: v.id('users'), text: v.string() },
+    args: {
+        userId: v.id('users'),
+        text: v.string(),
+        requestUserId: v.id('users'),
+    },
     handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) {
-            throw new Error('Called storeUser without authentication present');
-        }
-        const receiver = await ctx.db
-            .query('users')
-            .filter((q) => q.eq(q.field('_id'), args.userId))
-            .first();
+        const receiver = await getUserById(ctx.db, { id: args.userId });
         if (!receiver) throw new Error('User not exist');
-        // existing chat check
-        const usersChats = await ctx.db
-            .query('chatToUsers')
-            .filter((q) =>
-                q.or(
-                    q.eq(q.field('userId'), args.userId),
-                    q.eq(q.field('userId'), identity.subject)
-                )
-            )
-            .collect();
-        let chatId = findDuplicateChatId(
-            usersChats.map((it) => {
-                return { chatId: it.chatId, userId: it.userId };
-            })
-        );
+        let chatId = await getExistingChat(ctx.db, {
+            userIds: [args.requestUserId, args.userId],
+        });
         if (!chatId) {
             chatId = await createChat(ctx.db, {
-                sender: identity.subject as Id<'users'>,
+                sender: args.requestUserId,
                 receiver: args.userId,
             });
         }
         const messageId = await insertMessage(ctx.db, {
             content: args.text,
             chatId,
-            sender: identity.subject as Id<'users'>,
+            sender: args.requestUserId,
             receiver: args.userId,
         });
 
         return { messageId, chatId };
+    },
+});
+
+export const listChats = query({
+    args: {
+        requestUserId: v.id('users'),
+        page: v.number(),
+        perPage: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const chats = await getChats(ctx.db, args);
+        return { items: chats };
     },
 });

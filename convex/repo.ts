@@ -1,5 +1,6 @@
 import { Id } from './_generated/dataModel';
-import { DatabaseWriter } from './_generated/server';
+import { DatabaseReader, DatabaseWriter } from './_generated/server';
+import { findDuplicateChatId } from './helpers';
 
 export const insertMessage = async (
     db: DatabaseWriter,
@@ -17,23 +18,9 @@ export const insertMessage = async (
         sender: sender,
     });
 
-    await db.patch(chatId, { lastMessageId: messageId, sender, content });
-    await Promise.all([
-        await db.insert('updates', {
-            content,
-            sender,
-            userId: sender,
-            chatId,
-            messageId,
-        }),
-        await db.insert('updates', {
-            content,
-            sender,
-            userId: receiver,
-            chatId,
-            messageId,
-        }),
-    ]);
+    const time = Number(new Date());
+
+    await db.patch(chatId, { lastMessageTime: time, sender, content });
     return messageId;
 };
 
@@ -43,7 +30,7 @@ export const createChat = async (
 ) => {
     const { sender, receiver } = params;
     const chatId = await db.insert('chats', {
-        lastMessageId: null,
+        lastMessageTime: null,
         content: null,
         sender: null,
     });
@@ -61,4 +48,67 @@ export const createChat = async (
     ]);
 
     return chatId;
+};
+
+export const getUserById = async (
+    db: DatabaseWriter,
+    params: { id: Id<'users'> }
+) => {
+    const user = await db
+        .query('users')
+        .filter((q) => q.eq(q.field('_id'), params.id))
+        .first();
+    return user;
+};
+
+export const getExistingChat = async (
+    db: DatabaseReader,
+    params: { userIds: Id<'users'>[] }
+) => {
+    const usersChats = await db
+        .query('chatToUsers')
+        .filter((q) =>
+            q.or(
+                q.eq(q.field('userId'), params.userIds[0]),
+                q.eq(q.field('userId'), params.userIds[1])
+            )
+        )
+        .collect();
+    const chatId = findDuplicateChatId(
+        usersChats.map((it) => {
+            return { chatId: it.chatId, userId: it.userId };
+        })
+    );
+    return chatId;
+};
+
+export const getChats = async (
+    db: DatabaseReader,
+    params: { requestUserId: Id<'users'>; page: number; perPage: number }
+) => {
+    const userChatIdsWithNames = (
+        await db
+            .query('chatToUsers')
+            .filter((q) => q.eq(q.field('userId'), params.requestUserId))
+            .collect()
+    ).map((it) => {
+        return { chatId: it.chatId, chatName: it.chatName };
+    });
+    const chats = await Promise.all(
+        userChatIdsWithNames.map(async (ids) => {
+            const chat = await db
+                .query('chats')
+                .filter((q) => q.eq(q.field('_id'), ids.chatId))
+                .first();
+            return chat!;
+        })
+    );
+    const sorted = chats.sort(
+        (a, b) => b.lastMessageTime! - a.lastMessageTime!
+    );
+    const paginated = sorted.slice(
+        (params.page - 1) * params.perPage,
+        params.page * params.perPage
+    );
+    return paginated;
 };
