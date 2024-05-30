@@ -76,3 +76,18 @@ export const listMessages = query({
         return { items: chats };
     },
 });
+
+export const checkChatExistence = query({
+    args: {
+        requestUserId: v.id('users'),
+        userId: v.id('users'),
+    },
+    handler: async (ctx, args) => {
+        const user = await getUserById(ctx.db, { id: args.userId });
+        if (!user) throw new Error('User not exist');
+        const chatId = await getExistingChat(ctx.db, {
+            userIds: [args.requestUserId, args.userId],
+        });
+        return { chatId: chatId };
+    },
+});

@@ -52,7 +52,7 @@ export const createChat = async (
 };
 
 export const getUserById = async (
-    db: DatabaseWriter,
+    db: DatabaseReader,
     params: { id: Id<'users'> }
 ) => {
     const user = await db
