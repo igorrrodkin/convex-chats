@@ -85,7 +85,7 @@ export const listMessages = query({
 export const checkChatExistence = mutation({
     args: {
         requestUserId: v.id('users'),
-        userName: v.id('users'),
+        userName: v.string(),
     },
     handler: async (ctx, args) => {
         const user = await getUserByName(ctx.db, { name: args.userName });
