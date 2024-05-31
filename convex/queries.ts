@@ -6,6 +6,7 @@ import {
     getExistingChat,
     getMessages,
     getUserById,
+    getUserByName,
     insertMessage,
 } from './repo';
 import { paginationOptsValidator } from 'convex/server';
@@ -27,21 +28,21 @@ export const createUser = mutation({
 
 export const sendMessage = mutation({
     args: {
-        userId: v.id('users'),
+        userName: v.string(),
         text: v.string(),
         requestUserId: v.id('users'),
     },
     handler: async (ctx, args) => {
         const sender = await getUserById(ctx.db, { id: args.requestUserId });
-        const receiver = await getUserById(ctx.db, { id: args.userId });
+        const receiver = await getUserByName(ctx.db, { name: args.userName });
         if (!receiver) throw new Error('User not exist');
         let chatId = await getExistingChat(ctx.db, {
-            userIds: [args.requestUserId, args.userId],
+            userIds: [args.requestUserId, receiver._id],
         });
         if (!chatId) {
             chatId = await createChat(ctx.db, {
                 sender: args.requestUserId,
-                receiver: args.userId,
+                receiver: receiver._id,
                 senderName: sender!.name,
                 receiverName: receiver.name,
             });
@@ -50,7 +51,7 @@ export const sendMessage = mutation({
             content: args.text,
             chatId,
             sender: args.requestUserId,
-            receiver: args.userId,
+            receiver: receiver._id,
             senderName: sender!.name,
         });
 
@@ -84,13 +85,13 @@ export const listMessages = query({
 export const checkChatExistence = mutation({
     args: {
         requestUserId: v.id('users'),
-        userId: v.id('users'),
+        userName: v.id('users'),
     },
     handler: async (ctx, args) => {
-        const user = await getUserById(ctx.db, { id: args.userId });
+        const user = await getUserByName(ctx.db, { name: args.userName });
         if (!user) throw new Error('User not exist');
         const chatId = await getExistingChat(ctx.db, {
-            userIds: [args.requestUserId, args.userId],
+            userIds: [args.requestUserId, user._id],
         });
         return { chatId: chatId };
     },

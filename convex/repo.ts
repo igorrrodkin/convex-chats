@@ -72,6 +72,17 @@ export const getUserById = async (
     return user;
 };
 
+export const getUserByName = async (
+    db: DatabaseReader,
+    params: { name: string }
+) => {
+    const user = await db
+        .query('users')
+        .filter((q) => q.eq(q.field('name'), params.name))
+        .first();
+    return user;
+};
+
 export const getExistingChat = async (
     db: DatabaseReader,
     params: { userIds: Id<'users'>[] }
