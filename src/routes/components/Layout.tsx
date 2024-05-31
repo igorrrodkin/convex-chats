@@ -6,7 +6,11 @@ import { api } from '../../../convex/_generated/api';
 import { useChatsStore } from '../../store/store';
 import '../../styles/layout.css';
 
-export default function Layout({ children }) {
+interface LayoutProps {
+	children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
 	const userId = sessionStorage.getItem('userId');
 	const navigate = useNavigate();
 	const location = useLocation();

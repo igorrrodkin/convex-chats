@@ -12,7 +12,7 @@ export const insertMessage = async (
         receiver: Id<'users'>;
     }
 ) => {
-    const { content, chatId, sender, receiver } = params;
+    const { content, chatId, sender } = params;
     const messageId = await db.insert('messages', {
         content: content,
         chatId: chatId,
