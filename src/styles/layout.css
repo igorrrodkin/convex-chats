@@ -1,3 +1,78 @@
-.active {
-	color: red;
+.container {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 20px;
+}
+.content {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	max-width: 800px;
+	max-height: 495px;
+	border: 1px solid gray;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.sidebar {
+	max-width: 25%;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid gray;
+	overflow-y: auto;
+	position: relative;
+}
+
+.active-chat {
+	background: #5879c24d !important;
+}
+
+.chat {
+	cursor: pointer;
+	color: #fff;
+	width: calc(100% - 24px);
+	display: flex;
+	background: none;
+	border: none;
+	border-bottom: 1px solid gray;
+	padding: 8px 12px;
+	flex-direction: column;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	min-height: 53px;
+	gap: 4px;
+	& p {
+		text-overflow: ellipsis;
+    overflow: hidden;
+	}
+	& a {
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+}
+
+.new-chat-button {
+	padding: 0.6em 1.2em;
+	font-size: 1em;
+	font-weight: 500;
+	font-family: inherit;
+	background-color: #1a1a1a;
+	cursor: pointer;
+	transition: border-color 0.25s;
+}
+
+.new-chat-button:hover {
+	border-color: #646cff;
+}
+
+.new-chat-button:focus,
+.new-chat-button:focus-visible {
+	outline: 4px auto -webkit-focus-ring-color;
 }

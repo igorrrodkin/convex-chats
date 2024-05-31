@@ -5,6 +5,7 @@ import { api } from '../../convex/_generated/api';
 import { useEffect, useState } from 'react';
 import Layout from './components/Layout';
 import { useChatsStore } from '../store/store';
+import '../styles/chat.css';
 
 export default function Chats() {
 	const [message, setMessage] = useState<string>('');
@@ -57,21 +58,24 @@ export default function Chats() {
 
 	return (
 		<Layout>
-			<div>
-				{messages?.items.page.map((msg) => (
-					<div key={msg._id}>
-						<span>{msg.sender === userId ? 'You' : msg.sender}</span>
-						<p>{msg.content}</p>
-					</div>
-				))}
-				<input
-					type="text"
-					value={message}
-					onChange={(e) => setMessage(e.target.value)}
-				/>
-				<button onClick={sendMessage} disabled={message.length < 1}>
-					Send
-				</button>
+			<div className="messages-wrapper">
+				<div className="message-list">
+					{messages?.items.page.map((msg) => (
+						<div key={msg._id} className={msg.sender === userId ? 'sender-msg' : 'receiver-msg'}>
+							<p>{msg.content}</p>
+						</div>
+					))}
+				</div>
+				<div className="send-message">
+					<input
+						type="text"
+						value={message}
+						onChange={(e) => setMessage(e.target.value)}
+					/>
+					<button onClick={sendMessage} disabled={message.length < 1}>
+						Send
+					</button>
+				</div>
 			</div>
 		</Layout>
 	);

@@ -1,5 +1,5 @@
 import { useQuery } from 'convex/react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Id } from '../../../convex/_generated/dataModel';
 import { api } from '../../../convex/_generated/api';
@@ -9,6 +9,7 @@ import '../../styles/layout.css';
 export default function Layout({ children }) {
 	const userId = sessionStorage.getItem('userId');
 	const navigate = useNavigate();
+	const location = useLocation();
 	const bodyToTest = {
 		requestUserId: userId as Id<'users'>,
 		page: 1,
@@ -37,21 +38,34 @@ export default function Layout({ children }) {
 	});
 
 	return (
-		<div>
-			<div>
-				{chats?.items.map((item) => (
-					<div
-						key={item._id}
-						className={activeChat?._id === item._id ? 'active-chat' : 'chat'}
-					>
-						<NavLink to={`/chats/${item._id}`}>{item.name}</NavLink>
-					</div>
-				))}
-				<button>
-					<NavLink to={'/chats/new-chat'}>+ New chat</NavLink>
-				</button>
+		<div className="container">
+			<div className="content">
+				<div className="sidebar">
+					{chats?.items.map((item) => (
+						<div
+							onClick={() => navigate(`/chats/${item._id}`)}
+							key={item._id}
+							className={
+								activeChat?._id === item._id &&
+								!location.pathname.includes('/chats/new-chat')
+									? 'chat active-chat '
+									: 'chat'
+							}
+						>
+							<NavLink to={`/chats/${item._id}`}>{item.name}</NavLink>
+							<p>
+								{item.sender === userId ? 'You' : item.sender?.slice(0, 3)}:
+								{item.content}
+							</p>
+						</div>
+					))}
+
+					<NavLink to={'/chats/new-chat'} className="new-chat-button">
+						+ New chat
+					</NavLink>
+				</div>
+				{children}
 			</div>
-			{children}
 		</div>
 	);
 }
