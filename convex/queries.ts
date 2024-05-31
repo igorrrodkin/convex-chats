@@ -32,6 +32,7 @@ export const sendMessage = mutation({
         requestUserId: v.id('users'),
     },
     handler: async (ctx, args) => {
+        const sender = await getUserById(ctx.db, { id: args.requestUserId });
         const receiver = await getUserById(ctx.db, { id: args.userId });
         if (!receiver) throw new Error('User not exist');
         let chatId = await getExistingChat(ctx.db, {
@@ -41,6 +42,8 @@ export const sendMessage = mutation({
             chatId = await createChat(ctx.db, {
                 sender: args.requestUserId,
                 receiver: args.userId,
+                senderName: sender!.name,
+                receiverName: receiver.name,
             });
         }
         const messageId = await insertMessage(ctx.db, {
@@ -48,6 +51,7 @@ export const sendMessage = mutation({
             chatId,
             sender: args.requestUserId,
             receiver: args.userId,
+            senderName: sender!.name,
         });
 
         return { messageId, chatId };

@@ -10,9 +10,10 @@ export const insertMessage = async (
         chatId: Id<'chats'>;
         sender: Id<'users'>;
         receiver: Id<'users'>;
+        senderName: string;
     }
 ) => {
-    const { content, chatId, sender } = params;
+    const { content, chatId, sender, senderName } = params;
     const messageId = await db.insert('messages', {
         content: content,
         chatId: chatId,
@@ -21,15 +22,24 @@ export const insertMessage = async (
 
     const time = Number(new Date());
 
-    await db.patch(chatId, { lastMessageTime: time, sender, content });
+    await db.patch(chatId, {
+        lastMessageTime: time,
+        sender: senderName,
+        content,
+    });
     return messageId;
 };
 
 export const createChat = async (
     db: DatabaseWriter,
-    params: { sender: Id<'users'>; receiver: Id<'users'> }
+    params: {
+        sender: Id<'users'>;
+        receiver: Id<'users'>;
+        senderName: string;
+        receiverName: string;
+    }
 ) => {
-    const { sender, receiver } = params;
+    const { sender, receiver, receiverName, senderName } = params;
     const chatId = await db.insert('chats', {
         lastMessageTime: null,
         content: null,
@@ -39,12 +49,12 @@ export const createChat = async (
         await db.insert('chatToUsers', {
             chatId: chatId,
             userId: sender,
-            chatName: receiver,
+            chatName: receiverName,
         }),
         await db.insert('chatToUsers', {
             chatId: chatId,
             userId: receiver,
-            chatName: sender,
+            chatName: senderName,
         }),
     ]);
 

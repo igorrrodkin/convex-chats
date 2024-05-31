@@ -4,7 +4,7 @@ export default defineSchema({
     chats: defineTable({
         lastMessageTime: v.union(v.number(), v.null()),
         content: v.union(v.string(), v.null()),
-        sender: v.union(v.id('users'), v.null()),
+        sender: v.union(v.string(), v.null()),
     }),
 
     users: defineTable({
