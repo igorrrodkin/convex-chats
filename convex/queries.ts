@@ -73,7 +73,7 @@ export const listMessages = query({
     },
     handler: async (ctx, args) => {
         const chats = await getMessages(ctx.db, args);
-        return { items: chats };
+        return chats;
     },
 });
 
