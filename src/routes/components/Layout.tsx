@@ -1,5 +1,5 @@
 import { useQuery } from 'convex/react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, redirect, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Id } from '../../../convex/_generated/dataModel';
 import { api } from '../../../convex/_generated/api';
@@ -45,6 +45,15 @@ export default function Layout({ children }: LayoutProps) {
 
 	return (
 		<div className="container">
+			<p>{username}</p>
+			<button
+				onClick={() => {
+					sessionStorage.clear();
+					navigate('/auth');
+				}}
+			>
+				Logout
+			</button>
 			<div className="content">
 				<div className="sidebar">
 					{chats?.items.map((item) => (
