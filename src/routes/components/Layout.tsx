@@ -12,6 +12,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
 	const userId = sessionStorage.getItem('userId');
+	const username = sessionStorage.getItem('username');
 	const navigate = useNavigate();
 	const location = useLocation();
 	const bodyToTest = {
@@ -20,6 +21,8 @@ export default function Layout({ children }: LayoutProps) {
 		perPage: 10,
 	};
 	const chats = useQuery(api.queries.listChats, bodyToTest);
+	const storeChats = useChatsStore((state) => state.chats);
+
 	const addNewChats = useChatsStore((state) => state.updateChats);
 	const activeChat = useChatsStore((state) => state.activeChat);
 
@@ -31,6 +34,9 @@ export default function Layout({ children }: LayoutProps) {
 
 	useEffect(() => {
 		if (chats) {
+			console.log(chats, 'chats');
+			console.log(storeChats, 'storeChats');
+
 			addNewChats(chats);
 		}
 	}, [chats]);
@@ -58,8 +64,7 @@ export default function Layout({ children }: LayoutProps) {
 						>
 							<NavLink to={`/chats/${item._id}`}>{item.name}</NavLink>
 							<p>
-								{item.sender === userId ? 'You' : item.sender?.slice(0, 3)}:
-								{item.content}
+								{item.sender === username ? 'You' : item.sender}:{item.content}
 							</p>
 						</div>
 					))}

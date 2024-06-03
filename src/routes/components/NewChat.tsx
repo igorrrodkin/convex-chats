@@ -18,7 +18,7 @@ export default function NewChat() {
 	const storeChats = useChatsStore((state) => state.chats);
 
 	const bodyToTest = {
-		userId: sendTo as Id<'users'>,
+		userName: sendTo,
 		text: message,
 		requestUserId: userId as Id<'users'>,
 	};
@@ -34,11 +34,9 @@ export default function NewChat() {
 	};
 
 	const checkChat = async () => {
-		console.log(sendTo);
-
 		const checkedChat = await checkChatToSend({
 			requestUserId: userId as Id<'users'>,
-			userId: sendTo as Id<'users'>,
+			userName: sendTo,
 		});
 		const chatExist = storeChats?.items.find(
 			(item) => item._id === checkedChat?.chatId

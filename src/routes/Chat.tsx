@@ -27,40 +27,33 @@ export default function Chats() {
 	});
 
 	const bodyToTest = {
-		userId: activeChat?.name as Id<'users'>,
+		userName: activeChat?.name as Id<'users'>,
 		text: message,
 		requestUserId: userId as Id<'users'>,
 	};
 
 	const bodyQueryTest = {
 		chatId: chatId as Id<'chats'>,
-		paginationOpts: {
-			cursor: null,
-			endCursor: null,
-			id: 0,
-			maximumBytesRead: 100000,
-			maximumRowsRead: 1000,
-			numItems: 10,
-		},
 	};
 
 	const sendMsg = useMutation(api.queries.sendMessage);
 
 	const sendMessage = async () => {
 		if (!message) return;
-		console.log(activeChat, 'activeChatById');
 		await sendMsg(bodyToTest);
 		setMessage('');
-		console.log(messages);
 	};
 
-	const messages = useQuery(api.queries.listMessages, bodyQueryTest);
+	const messages = useQuery(
+		api.queries.listMessagesWithoutPagination,
+		bodyQueryTest
+	);
 
 	return (
 		<Layout>
 			<div className="messages-wrapper">
 				<div className="message-list">
-					{messages?.items.page.map((msg) => (
+					{messages?.map((msg) => (
 						<div key={msg._id} className={msg.sender === userId ? 'sender-msg' : 'receiver-msg'}>
 							<p>{msg.content}</p>
 						</div>

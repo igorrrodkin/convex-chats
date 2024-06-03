@@ -12,11 +12,11 @@ export default function Auth() {
 	const register = async () => {
 		if (!username) return alert('Enter valid username');
 		const userId = await auth({ name: username });
-		console.log(userId, 'userId');
 
 		if (userId) {
 			sessionStorage.setItem('userId', userId);
-			console.log(userId);
+			sessionStorage.setItem('username', username);
+
 			return navigate('/chats');
 		}
 	};
