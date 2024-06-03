@@ -21,7 +21,6 @@ export default function Layout({ children }: LayoutProps) {
 		perPage: 10,
 	};
 	const chats = useQuery(api.queries.listChats, bodyToTest);
-	const storeChats = useChatsStore((state) => state.chats);
 
 	const addNewChats = useChatsStore((state) => state.updateChats);
 	const activeChat = useChatsStore((state) => state.activeChat);
@@ -34,9 +33,6 @@ export default function Layout({ children }: LayoutProps) {
 
 	useEffect(() => {
 		if (chats) {
-			console.log(chats, 'chats');
-			console.log(storeChats, 'storeChats');
-
 			addNewChats(chats);
 		}
 	}, [chats]);
