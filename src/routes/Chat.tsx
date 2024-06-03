@@ -16,6 +16,7 @@ export default function Chats() {
 	const activeChat = useChatsStore((state) => state.activeChat);
 	const setActiveChat = useChatsStore((state) => state.updateActiveChat);
 	const userId = sessionStorage.getItem('userId');
+	const messagesRef = useRef<HTMLDivElement>(null);
 
 	const messageListRef = useRef<HTMLDivElement>(null);
 
@@ -69,10 +70,20 @@ export default function Chats() {
 	}, [results[0]]);
 
 	useEffect(() => {
+		if (
+			messageListRef.current &&
+			messageListRef.current.scrollTop <= 0 &&
+			status === 'CanLoadMore'
+		) {
+			loadMore(12);
+		}
+	}, [results[results.length - 1]]);
+
+	useEffect(() => {
 		const handleScroll = () => {
 			if (
 				messageListRef.current &&
-				messageListRef.current.scrollTop <= 20 &&
+				messageListRef.current.scrollTop <= 70 &&
 				status === 'CanLoadMore'
 			) {
 				loadMore(12);
@@ -95,7 +106,7 @@ export default function Chats() {
 		<Layout>
 			<div className="chat-wrapper">
 				<div className="messages-wrapper" ref={messageListRef}>
-					<div className="message-list">
+					<div className="message-list" ref={messagesRef}>
 						{results.map((msg) => (
 							<div
 								key={msg._id}
