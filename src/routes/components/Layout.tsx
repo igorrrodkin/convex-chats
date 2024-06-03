@@ -1,5 +1,5 @@
 import { useQuery } from 'convex/react';
-import { NavLink, redirect, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Id } from '../../../convex/_generated/dataModel';
 import { api } from '../../../convex/_generated/api';

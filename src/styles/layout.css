@@ -50,7 +50,7 @@
 	gap: 4px;
 	& p {
 		text-overflow: ellipsis;
-    overflow: hidden;
+		overflow: hidden;
 	}
 	& a {
 		text-overflow: ellipsis;

@@ -14,7 +14,6 @@ function App() {
 				<Route path="/chats" element={<Chats />} />
 				<Route path="/chats/:id" element={<Chat />} />
 				<Route path="/chats/new-chat" element={<NewChat />} />
-
 			</Routes>
 		</BrowserRouter>
 	);
