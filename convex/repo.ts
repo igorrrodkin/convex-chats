@@ -146,3 +146,15 @@ export const getMessages = async (
         .paginate(params.paginationOpts);
     return messages;
 };
+
+export const getMessagesWithoutMessages = async (
+    db: DatabaseReader,
+    params: { chatId: Id<'chats'> }
+) => {
+    const messages = await db
+        .query('messages')
+        .filter((q) => q.eq(q.field('chatId'), params.chatId))
+        .order('desc')
+        .take(10);
+    return messages;
+};

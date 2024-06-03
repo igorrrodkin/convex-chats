@@ -5,6 +5,7 @@ import {
     getChats,
     getExistingChat,
     getMessages,
+    getMessagesWithoutMessages,
     getUserById,
     getUserByName,
     insertMessage,
@@ -78,6 +79,17 @@ export const listMessages = query({
     },
     handler: async (ctx, args) => {
         const chats = await getMessages(ctx.db, args);
+        return chats;
+    },
+});
+
+export const listMessagesWithoutPagination = query({
+    args: {
+        chatId: v.id('chats'),
+        // paginationOpts: paginationOptsValidator,
+    },
+    handler: async (ctx, args) => {
+        const chats = await getMessagesWithoutMessages(ctx.db, args);
         return chats;
     },
 });
