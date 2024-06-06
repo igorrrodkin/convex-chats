@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export default function LoadPage() {
 	const navigate = useNavigate();
 	useEffect(() => {
-		if (!sessionStorage.getItem('userId')) {
+		if (!localStorage.getItem('userId')) {
 			return navigate('/auth');
 		} else {
 			return navigate('/chats');

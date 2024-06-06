@@ -15,7 +15,7 @@ export default function Chats() {
 	const storeChats = useChatsStore((state) => state.chats);
 	const activeChat = useChatsStore((state) => state.activeChat);
 	const setActiveChat = useChatsStore((state) => state.updateActiveChat);
-	const userId = sessionStorage.getItem('userId');
+	const userId = localStorage.getItem('userId');
 	const messagesRef = useRef<HTMLDivElement>(null);
 
 	const messageListRef = useRef<HTMLDivElement>(null);

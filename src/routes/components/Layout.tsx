@@ -5,16 +5,19 @@ import { Id } from '../../../convex/_generated/dataModel';
 import { api } from '../../../convex/_generated/api';
 import { useChatsStore } from '../../store/store';
 import '../../styles/layout.css';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface LayoutProps {
 	children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-	const userId = sessionStorage.getItem('userId');
-	const username = sessionStorage.getItem('username');
+	const userId = localStorage.getItem('userId');
+	const username = localStorage.getItem('username');
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { logout } = useAuth0();
+
 	const bodyToTest = {
 		requestUserId: userId as Id<'users'>,
 		page: 1,
@@ -26,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
 	const activeChat = useChatsStore((state) => state.activeChat);
 
 	useEffect(() => {
-		if (!sessionStorage.getItem('userId')) {
+		if (!localStorage.getItem('userId')) {
 			return navigate('/auth');
 		}
 	});
@@ -38,7 +41,7 @@ export default function Layout({ children }: LayoutProps) {
 	}, [chats]);
 
 	useEffect(() => {
-		if (!sessionStorage.getItem('userId')) {
+		if (!localStorage.getItem('userId')) {
 			return navigate('/auth');
 		}
 	});
@@ -48,8 +51,8 @@ export default function Layout({ children }: LayoutProps) {
 			<p>{username}</p>
 			<button
 				onClick={() => {
-					sessionStorage.clear();
-					navigate('/auth');
+					localStorage.clear();
+					logout({ logoutParams: { returnTo: window.location.origin } });
 				}}
 			>
 				Logout

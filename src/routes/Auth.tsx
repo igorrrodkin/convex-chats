@@ -1,10 +1,13 @@
-import { useMutation } from 'convex/react';
+import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function Auth() {
 	const [username, setUsername] = useState<string>('');
+	const { isLoading } = useConvexAuth();
+	const { loginWithRedirect } = useAuth0();
 	const navigate = useNavigate();
 
 	const auth = useMutation(api.queries.createUser);
@@ -14,15 +17,15 @@ export default function Auth() {
 		const userId = await auth({ name: username });
 
 		if (userId) {
-			sessionStorage.setItem('userId', userId);
-			sessionStorage.setItem('username', username);
-
-			return navigate('/chats');
+			localStorage.setItem('userId', userId);
+			localStorage.setItem('username', username);
+			await loginWithRedirect();
+			// return navigate('/chats');
 		}
 	};
 
 	useEffect(() => {
-		if (sessionStorage.getItem('userId')) {
+		if (localStorage.getItem('userId')) {
 			return navigate('/chats');
 		}
 	});
@@ -34,7 +37,9 @@ export default function Auth() {
 				value={username}
 				onChange={(e) => setUsername(e.target.value)}
 			/>
-			<button onClick={register}>Login</button>
+			<button disabled={isLoading} onClick={register}>
+				Login
+			</button>
 		</div>
 	);
 }
