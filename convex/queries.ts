@@ -113,9 +113,7 @@ export const testIndentity = query({
     args: {},
     handler: async (ctx) => {
         const user = await ctx.auth.getUserIdentity();
-        if (!user) {
-            throw new Error('User is not authorized');
-        }
-        return { issuer: user.issuer, subject: user.subject };
+        console.log('USER identity', user);
+        return { issuer: user!.issuer, subject: user!.subject };
     },
 });
