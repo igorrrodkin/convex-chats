@@ -11,7 +11,7 @@ export default function NewChat() {
 	const [sendTo, setSendTo] = useState<string>('');
 	const [newChat, setNewChat] = useState<boolean>(false);
 
-	const userId = sessionStorage.getItem('userId');
+	const userId = localStorage.getItem('userId');
 	const navigate = useNavigate();
 	const checkChatToSend = useMutation(api.queries.checkChatExistence);
 
