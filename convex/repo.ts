@@ -61,13 +61,13 @@ export const createChat = async (
     return chatId;
 };
 
-export const getUserById = async (
+export const getUserByIdentifier = async (
     db: DatabaseReader,
-    params: { id: Id<'users'> }
+    params: { tokenIdentifier: string }
 ) => {
     const user = await db
         .query('users')
-        .filter((q) => q.eq(q.field('_id'), params.id))
+        .filter((q) => q.eq(q.field('tokenIdentifier'), params.tokenIdentifier))
         .first();
     return user;
 };
@@ -78,7 +78,7 @@ export const getUserByName = async (
 ) => {
     const user = await db
         .query('users')
-        .filter((q) => q.eq(q.field('name'), params.name))
+        .filter((q) => q.eq(q.field('username'), params.name))
         .first();
     return user;
 };
@@ -144,17 +144,5 @@ export const getMessages = async (
         .filter((q) => q.eq(q.field('chatId'), params.chatId))
         .order('desc')
         .paginate(params.paginationOpts);
-    return messages;
-};
-
-export const getMessagesWithoutMessages = async (
-    db: DatabaseReader,
-    params: { chatId: Id<'chats'> }
-) => {
-    const messages = await db
-        .query('messages')
-        .filter((q) => q.eq(q.field('chatId'), params.chatId))
-        .order('desc')
-        .take(10);
     return messages;
 };

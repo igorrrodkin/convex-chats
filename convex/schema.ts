@@ -8,7 +8,8 @@ export default defineSchema({
     }),
 
     users: defineTable({
-        name: v.string(),
+        username: v.string(),
+        tokenIdentifier: v.string(),
     }),
 
     chatToUsers: defineTable({
@@ -21,11 +22,5 @@ export default defineSchema({
         chatId: v.id('chats'),
         sender: v.id('users'),
         content: v.string(),
-    }),
-
-    userIdentities: defineTable({
-        tokenIdentifier: v.string(),
-        name: v.string(),
-        nickname: v.string(),
     }),
 });

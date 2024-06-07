@@ -5,22 +5,30 @@ import {
     getChats,
     getExistingChat,
     getMessages,
-    getMessagesWithoutMessages,
-    getUserById,
+    getUserByIdentifier,
     getUserByName,
     insertMessage,
 } from './repo';
 import { paginationOptsValidator } from 'convex/server';
 
 export const createUser = mutation({
-    args: { name: v.string() },
-    handler: async (ctx, args) => {
+    args: {},
+    handler: async (ctx) => {
+        const user = await ctx.auth.getUserIdentity();
+        if (!user) {
+            throw new Error('User is not authorized');
+        }
         const existingUser = await ctx.db
             .query('users')
-            .filter((q) => q.eq(q.field('name'), args.name))
+            .filter((q) =>
+                q.eq(q.field('tokenIdentifier'), user.tokenIdentifier)
+            )
             .first();
         if (!existingUser) {
-            const userId = await ctx.db.insert('users', { name: args.name });
+            const userId = await ctx.db.insert('users', {
+                username: user.nickname!,
+                tokenIdentifier: user.tokenIdentifier,
+            });
             return userId;
         }
         return existingUser._id;
@@ -31,29 +39,35 @@ export const sendMessage = mutation({
     args: {
         userName: v.string(),
         text: v.string(),
-        requestUserId: v.id('users'),
     },
     handler: async (ctx, args) => {
-        const sender = await getUserById(ctx.db, { id: args.requestUserId });
+        const user = await ctx.auth.getUserIdentity();
+        if (!user) {
+            throw new Error('User is not authorized');
+        }
+        const sender = await getUserByIdentifier(ctx.db, {
+            tokenIdentifier: user.tokenIdentifier,
+        });
+        if (!sender) throw new Error('Sender is not defined');
         const receiver = await getUserByName(ctx.db, { name: args.userName });
         if (!receiver) throw new Error('User not exist');
         let chatId = await getExistingChat(ctx.db, {
-            userIds: [args.requestUserId, receiver._id],
+            userIds: [sender._id, receiver._id],
         });
         if (!chatId) {
             chatId = await createChat(ctx.db, {
-                sender: args.requestUserId,
+                sender: sender._id,
                 receiver: receiver._id,
-                senderName: sender!.name,
-                receiverName: receiver.name,
+                senderName: sender.username,
+                receiverName: receiver.username,
             });
         }
         const messageId = await insertMessage(ctx.db, {
             content: args.text,
             chatId,
-            sender: args.requestUserId,
+            sender: sender._id,
             receiver: receiver._id,
-            senderName: sender!.name,
+            senderName: sender.username,
         });
 
         return { messageId, chatId };
@@ -62,12 +76,23 @@ export const sendMessage = mutation({
 
 export const listChats = query({
     args: {
-        requestUserId: v.id('users'),
         page: v.number(),
         perPage: v.number(),
     },
     handler: async (ctx, args) => {
-        const chats = await getChats(ctx.db, args);
+        const user = await ctx.auth.getUserIdentity();
+        if (!user) {
+            throw new Error('User is not authorized');
+        }
+        const sender = await getUserByIdentifier(ctx.db, {
+            tokenIdentifier: user.tokenIdentifier,
+        });
+        if (!sender) throw new Error('Sender is not defined');
+
+        const chats = await getChats(ctx.db, {
+            ...args,
+            requestUserId: sender._id,
+        });
         return { items: chats };
     },
 });
@@ -78,50 +103,39 @@ export const listMessages = query({
         paginationOpts: paginationOptsValidator,
     },
     handler: async (ctx, args) => {
-        const chats = await getMessages(ctx.db, args);
-        return chats;
-    },
-});
+        const user = await ctx.auth.getUserIdentity();
+        if (!user) {
+            throw new Error('User is not authorized');
+        }
+        const sender = await getUserByIdentifier(ctx.db, {
+            tokenIdentifier: user.tokenIdentifier,
+        });
+        if (!sender) throw new Error('Sender is not defined');
 
-export const listMessagesWithoutPagination = query({
-    args: {
-        chatId: v.id('chats'),
-        // paginationOpts: paginationOptsValidator,
-    },
-    handler: async (ctx, args) => {
-        const chats = await getMessagesWithoutMessages(ctx.db, args);
+        const chats = await getMessages(ctx.db, args);
         return chats;
     },
 });
 
 export const checkChatExistence = mutation({
     args: {
-        requestUserId: v.id('users'),
         userName: v.string(),
     },
     handler: async (ctx, args) => {
-        const user = await getUserByName(ctx.db, { name: args.userName });
-        if (!user) throw new Error('User not exist');
-        const chatId = await getExistingChat(ctx.db, {
-            userIds: [args.requestUserId, user._id],
-        });
-        return { chatId: chatId };
-    },
-});
-
-export const testIndentity = mutation({
-    args: {},
-    handler: async (ctx) => {
         const user = await ctx.auth.getUserIdentity();
-        console.log('USER identity', user);
         if (!user) {
             throw new Error('User is not authorized');
         }
-        await ctx.db.insert('userIdentities', {
+        const sender = await getUserByIdentifier(ctx.db, {
             tokenIdentifier: user.tokenIdentifier,
-            name: user.name || 'name',
-            nickname: user.nickname || 'nickname',
         });
-        return 'done';
+        if (!sender) throw new Error('Sender is not defined');
+
+        const userToSend = await getUserByName(ctx.db, { name: args.userName });
+        if (!userToSend) throw new Error('User not exist');
+        const chatId = await getExistingChat(ctx.db, {
+            userIds: [sender._id, userToSend._id],
+        });
+        return { chatId: chatId };
     },
 });
