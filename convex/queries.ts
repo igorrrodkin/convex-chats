@@ -109,11 +109,19 @@ export const checkChatExistence = mutation({
     },
 });
 
-export const testIndentity = query({
+export const testIndentity = mutation({
     args: {},
     handler: async (ctx) => {
         const user = await ctx.auth.getUserIdentity();
         console.log('USER identity', user);
-        return { issuer: user!.issuer, subject: user!.subject };
+        if (!user) {
+            throw new Error('User is not authorized');
+        }
+        await ctx.db.insert('userIdentities', {
+            tokenIdentifier: user.tokenIdentifier,
+            name: user.name || 'name',
+            nickname: user.nickname || 'nickname',
+        });
+        return 'done';
     },
 });

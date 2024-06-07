@@ -22,4 +22,10 @@ export default defineSchema({
         sender: v.id('users'),
         content: v.string(),
     }),
+
+    userIdentities: defineTable({
+        tokenIdentifier: v.string(),
+        name: v.string(),
+        nickname: v.string(),
+    }),
 });
