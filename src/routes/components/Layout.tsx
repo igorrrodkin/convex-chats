@@ -35,12 +35,10 @@ export default function Layout({ children }: LayoutProps) {
 
 	useEffect(() => {
 		if (isAuthenticated) {
-			console.log(isAuthenticated, 'isAuthenticated');
 			
 			const getIndentity = async () => {
 				const res = await createUser();
 				localStorage.setItem('userId', res.id);
-				console.log(res, 'asd');
 				return res;
 			};
 			getIndentity();

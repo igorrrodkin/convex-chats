@@ -31,15 +31,20 @@ export default function NewChat() {
 	};
 
 	const checkChat = async () => {
-		const checkedChat = await checkChatToSend({
-			userName: sendTo,
-		});
-		const chatExist = storeChats?.items.find(
-			(item) => item._id === checkedChat?.chatId
-		);
-		if (chatExist) return navigate(`/chats/${checkedChat?.chatId}`);
-		if (!chatExist) {
-			setNewChat(true);
+		try {
+			const checkedChat = await checkChatToSend({
+				userName: sendTo,
+			});
+
+			const chatExist = storeChats?.items.find(
+				(item) => item._id === checkedChat?.chatId
+			);
+			if (chatExist) return navigate(`/chats/${checkedChat?.chatId}`);
+			if (!chatExist) {
+				setNewChat(true);
+			}
+		} catch (error) {
+			alert('User not exist');
 		}
 	};
 
