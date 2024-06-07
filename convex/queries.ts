@@ -29,7 +29,7 @@ export const createUser = mutation({
                 username: user.nickname,
                 tokenIdentifier: user.tokenIdentifier,
             });
-            return userId;
+            return { id: userId, nickname: user.nickname };
         }
         return { id: existingUser._id, nickname: user.nickname };
     },
