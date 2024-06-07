@@ -15,7 +15,7 @@ export const createUser = mutation({
     args: {},
     handler: async (ctx) => {
         const user = await ctx.auth.getUserIdentity();
-        if (!user) {
+        if (!user || !user?.nickname) {
             throw new Error('User is not authorized');
         }
         const existingUser = await ctx.db
@@ -26,12 +26,12 @@ export const createUser = mutation({
             .first();
         if (!existingUser) {
             const userId = await ctx.db.insert('users', {
-                username: user.nickname!,
+                username: user.nickname,
                 tokenIdentifier: user.tokenIdentifier,
             });
             return userId;
         }
-        return existingUser._id;
+        return { id: existingUser._id, nickname: user.nickname };
     },
 });
 
