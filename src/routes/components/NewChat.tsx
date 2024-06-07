@@ -2,7 +2,6 @@ import { useMutation } from 'convex/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../convex/_generated/api';
-import { Id } from '../../../convex/_generated/dataModel';
 import Layout from './Layout';
 import { useChatsStore } from '../../store/store';
 
@@ -11,7 +10,6 @@ export default function NewChat() {
 	const [sendTo, setSendTo] = useState<string>('');
 	const [newChat, setNewChat] = useState<boolean>(false);
 
-	const userId = localStorage.getItem('userId');
 	const navigate = useNavigate();
 	const checkChatToSend = useMutation(api.queries.checkChatExistence);
 
@@ -20,7 +18,6 @@ export default function NewChat() {
 	const bodyToTest = {
 		userName: sendTo,
 		text: message,
-		requestUserId: userId as Id<'users'>,
 	};
 
 	const sendMsg = useMutation(api.queries.sendMessage);
@@ -35,7 +32,6 @@ export default function NewChat() {
 
 	const checkChat = async () => {
 		const checkedChat = await checkChatToSend({
-			requestUserId: userId as Id<'users'>,
 			userName: sendTo,
 		});
 		const chatExist = storeChats?.items.find(

@@ -15,7 +15,6 @@ export default function Chats() {
 	const storeChats = useChatsStore((state) => state.chats);
 	const activeChat = useChatsStore((state) => state.activeChat);
 	const setActiveChat = useChatsStore((state) => state.updateActiveChat);
-	const userId = localStorage.getItem('userId');
 	const messagesRef = useRef<HTMLDivElement>(null);
 
 	const messageListRef = useRef<HTMLDivElement>(null);
@@ -32,7 +31,6 @@ export default function Chats() {
 	const bodyToTest = {
 		userName: activeChat?.name as Id<'users'>,
 		text: message,
-		requestUserId: userId as Id<'users'>,
 	};
 
 	const bodyQueryTest = {
@@ -107,11 +105,13 @@ export default function Chats() {
 			<div className="chat-wrapper">
 				<div className="messages-wrapper" ref={messageListRef}>
 					<div className="message-list" ref={messagesRef}>
-						{results.map((msg) => (
+						{results?.map((msg) => (
 							<div
 								key={msg._id}
 								className={
-									msg.sender === userId ? 'sender-msg' : 'receiver-msg'
+									msg.sender === localStorage.getItem('userId')
+										? 'sender-msg'
+										: 'receiver-msg'
 								}
 							>
 								<p>{msg.content}</p>

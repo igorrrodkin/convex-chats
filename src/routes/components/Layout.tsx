@@ -1,7 +1,6 @@
-import { useQuery } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Id } from '../../../convex/_generated/dataModel';
 import { api } from '../../../convex/_generated/api';
 import { useChatsStore } from '../../store/store';
 import '../../styles/layout.css';
@@ -12,14 +11,14 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-	const userId = localStorage.getItem('userId');
-	const username = localStorage.getItem('username');
+	const { user } = useAuth0();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { logout } = useAuth0();
+	const createUser = useMutation(api.queries.createUser);
+	const { isAuthenticated } = useConvexAuth();
 
 	const bodyToTest = {
-		requestUserId: userId as Id<'users'>,
 		page: 1,
 		perPage: 10,
 	};
@@ -29,26 +28,28 @@ export default function Layout({ children }: LayoutProps) {
 	const activeChat = useChatsStore((state) => state.activeChat);
 
 	useEffect(() => {
-		if (!localStorage.getItem('userId')) {
-			return navigate('/auth');
-		}
-	});
-
-	useEffect(() => {
 		if (chats) {
 			addNewChats(chats);
 		}
 	}, [chats]);
 
 	useEffect(() => {
-		if (!localStorage.getItem('userId')) {
-			return navigate('/auth');
+		if (isAuthenticated) {
+			console.log(isAuthenticated, 'isAuthenticated');
+			
+			const getIndentity = async () => {
+				const res = await createUser();
+				localStorage.setItem('userId', res.id);
+				console.log(res, 'asd');
+				return res;
+			};
+			getIndentity();
 		}
-	});
+	}, [isAuthenticated]);
 
 	return (
 		<div className="container">
-			<p>{username}</p>
+			<p>{user?.nickname}</p>
 			<button
 				onClick={() => {
 					localStorage.clear();
@@ -59,20 +60,21 @@ export default function Layout({ children }: LayoutProps) {
 			</button>
 			<div className="content">
 				<div className="sidebar">
-					{chats?.items.map((item) => (
+					{chats?.items?.map((item) => (
 						<div
-							onClick={() => navigate(`/chats/${item._id}`)}
+							onClick={() => navigate(`/chats/${item?._id}`)}
 							key={item._id}
 							className={
-								activeChat?._id === item._id &&
+								activeChat?._id === item?._id &&
 								!location.pathname.includes('/chats/new-chat')
 									? 'chat active-chat '
 									: 'chat'
 							}
 						>
-							<NavLink to={`/chats/${item._id}`}>{item.name}</NavLink>
+							<NavLink to={`/chats/${item?._id}`}>{item?.name}</NavLink>
 							<p>
-								{item.sender === username ? 'You' : item.sender}:{item.content}
+								{item?.sender === user?.nickname ? 'You' : item?.sender}:
+								{item?.content}
 							</p>
 						</div>
 					))}
